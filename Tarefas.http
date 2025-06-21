@@ -1,0 +1,28 @@
+### Listar todas as tarefas
+GET http://localhost:3000/tarefas
+Accept: application/json
+
+###
+
+### Listar tarefas pendentes
+GET http://localhost:3000/tarefas?status=pendente
+Accept: application/json
+
+###
+
+### Adicionar nova tarefa
+POST http://localhost:3000/tarefas
+Content-Type: application/json
+
+{
+  "titulo": "Exemplo de tarefa",
+  "data": "2025-06-25",
+  "hora": "15:30",
+  "categoria": "Curso",
+  "status": "pendente"
+}
+
+###
+
+### Deletar tarefa pelo id (substitua :id pelo número)
+DELETE http://localhost:3000/tarefas/1
