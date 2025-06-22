@@ -315,6 +315,7 @@
 
       const result = await response.json();
       if (response.ok) {
+        console.log('Resposta da API ao adicionar:', result);
         clearInputs();
         carregarTarefas();
         showNotification('Tarefa adicionada com sucesso!');
@@ -359,9 +360,9 @@
       const infoDiv = document.createElement('div');
       infoDiv.className = 'tarefa-info';
       let titulo = tarefa.titulo; // Usa direto, sem decodificação
-      let categoria = tarefa.categoria; // Usa direto, sem decodificação
-      console.log('Renderizando tarefa:', { titulo, categoria });
-      infoDiv.innerHTML = `<strong>Tarefa: ${titulo}</strong><br>Categoria: ${categoria || 'Nenhuma'} - Status: ${tarefa.status}<br>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
+      let categoria = tarefa.categoria || 'Nenhuma'; // Fallback pra categoria vazia
+      console.log('Renderizando tarefa - Dados recebidos:', { titulo, categoria });
+      infoDiv.innerHTML = `<strong>Tarefa: ${titulo}</strong><br>Categoria: ${categoria} - Status: ${tarefa.status}<br>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
 
       const contadorSpan = document.createElement('span');
       contadorSpan.className = 'contador normal';
@@ -406,5 +407,4 @@
           } else {
             const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
             const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const segundos = Math.floor((diff % (100
+            const minutos = Math.floor((diff % (1000 *
