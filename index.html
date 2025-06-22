@@ -274,7 +274,7 @@
         alert('Por favor, faça login primeiro!');
         return;
       }
-      const titulo = btoa(document.getElementById('titulo').value.trim());
+      const titulo = document.getElementById('titulo').value.trim(); // Sem codificação
       const data = document.getElementById('data').value;
       const hora = document.getElementById('hora').value;
       let categoria = document.getElementById('categoria').value;
@@ -282,7 +282,6 @@
 
       console.log('Dados antes de processar:', { titulo, data, hora, categoria });
 
-      // Garantir que a categoria seja válida e codificada
       if (!categoria || categoria === '') {
         alert('Por favor, selecione uma categoria!');
         return;
@@ -295,7 +294,6 @@
         }
         categoria = customCategoria; // Usa o valor personalizado
       }
-      categoria = btoa(categoria); // Codifica a categoria antes de enviar
       console.log('Dados enviados:', { titulo, data, hora, categoria });
 
       if (!titulo || !data || !hora) {
@@ -363,25 +361,7 @@
       let titulo = tarefa.titulo;
       let categoria = tarefa.categoria;
       console.log('Renderizando tarefa - Antes da decodificação:', { titulo, categoria });
-      try {
-        // Validação e decodificação
-        if (typeof titulo === 'string' && titulo.length > 0 && /^[A-Za-z0-9+/=]+$/.test(titulo)) {
-          titulo = atob(titulo);
-        } else {
-          console.warn('Título inválido para decodificação:', tarefa.titulo);
-          titulo = 'Título Corrompido';
-        }
-        if (typeof categoria === 'string' && categoria.length > 0 && /^[A-Za-z0-9+/=]+$/.test(categoria)) {
-          categoria = atob(categoria);
-        } else {
-          console.warn('Categoria inválida para decodificação:', tarefa.categoria);
-          categoria = 'Sem Categoria';
-        }
-      } catch (e) {
-        console.error('Erro ao decodificar:', e);
-        titulo = 'Título Corrompido';
-        categoria = 'Sem Categoria';
-      }
+      // Sem decodificação, usa os valores como estão
       console.log('Renderizando tarefa - Após decodificação:', { titulo, categoria });
       infoDiv.innerHTML = `<strong>Título: ${titulo}</strong><br>Categoria: ${categoria} - Status: ${tarefa.status}<br>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
 
