@@ -6,55 +6,79 @@
   <title>Gerenciador de Tarefas</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #556270, #4ecdc4);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #2c3e50, #3498db);
       margin: 0;
       padding: 20px;
-      color: #fff;
+      color: #ecf0f1;
+      transition: all 0.3s ease;
     }
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      background: rgba(44, 62, 80, 0.9);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     h1 {
       text-align: center;
-      color: #fff;
+      color: #ecf0f1;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
     }
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     input, select, button {
-      padding: 10px;
-      margin: 5px;
+      padding: 12px;
+      margin: 5px 0;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: transform 0.2s;
+    }
+    input:focus, select:focus {
+      transform: scale(1.02);
+      outline: none;
+      box-shadow: 0 0 5px #3498db;
     }
     button {
-      background-color: #4ecdc4;
+      background-color: #3498db;
       color: white;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.3s ease, transform 0.2s;
     }
     button:hover {
-      background-color: #3baaa0;
+      background-color: #2980b9;
+      transform: scale(1.05);
     }
     #tarefas-list {
       list-style: none;
       padding: 0;
     }
     .tarefa-item {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
       padding: 15px;
-      margin: 8px 0;
-      border-radius: 5px;
+      margin: 10px 0;
+      border-radius: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
     .tarefa-info {
       flex-grow: 1;
@@ -62,21 +86,33 @@
     .contador {
       font-weight: bold;
       font-size: 0.9em;
-      color: #ffd700;
       margin-left: 10px;
+      transition: color 0.3s;
     }
-    .delete-btn {
-      background-color: #e63946;
-      padding: 7px 12px;
-      border-radius: 5px;
+    .contador.urgent { color: #e74c3c; }
+    .contador.warning { color: #f1c40f; }
+    .delete-btn, .complete-btn {
+      padding: 8px 15px;
+      border-radius: 8px;
       border: none;
       color: white;
       cursor: pointer;
-      margin-left: 15px;
-      transition: background-color 0.3s ease;
+      margin-left: 10px;
+      transition: background-color 0.3s ease, transform 0.2s;
+    }
+    .delete-btn {
+      background-color: #e74c3c;
     }
     .delete-btn:hover {
-      background-color: #b22b35;
+      background-color: #c0392b;
+      transform: scale(1.05);
+    }
+    .complete-btn {
+      background-color: #2ecc71;
+    }
+    .complete-btn:hover {
+      background-color: #27ae60;
+      transform: scale(1.05);
     }
   </style>
 </head>
@@ -144,7 +180,7 @@
       });
 
       const result = await response.json();
-      console.log('Resposta da API:', result); // Adicione isso para depurar
+      console.log('Resposta da API:', result);
       if (response.ok) {
         document.getElementById('titulo').value = '';
         document.getElementById('data').value = '';
@@ -186,8 +222,14 @@
         btnExcluir.textContent = 'Excluir';
         btnExcluir.onclick = () => deletarTarefa(tarefa.id);
 
+        const btnConcluir = document.createElement('button');
+        btnConcluir.className = 'complete-btn';
+        btnConcluir.textContent = tarefa.status === 'pendente' ? 'Concluir' : 'Reabrir';
+        btnConcluir.onclick = () => atualizarStatus(tarefa.id, tarefa.status === 'pendente' ? 'concluído' : 'pendente');
+
         li.appendChild(infoDiv);
         li.appendChild(contadorSpan);
+        li.appendChild(btnConcluir);
         li.appendChild(btnExcluir);
 
         lista.appendChild(li);
@@ -200,9 +242,9 @@
           const diff = dataHoraTarefa - now;
 
           const contadorSpan = document.getElementById(`contador-${tarefa.id}`);
-
           if (diff <= 0) {
             contadorSpan.textContent = 'Já chegou!';
+            contadorSpan.className = 'contador';
           } else {
             const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
             const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -210,9 +252,21 @@
             const segundos = Math.floor((diff % (1000 * 60)) / 1000);
 
             contadorSpan.textContent = `Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s`;
+            if (diff < 24 * 60 * 60 * 1000) contadorSpan.className = 'contador urgent';
+            else if (diff < 48 * 60 * 60 * 1000) contadorSpan.className = 'contador warning';
+            else contadorSpan.className = 'contador';
           }
         });
       }, 1000);
+    }
+
+    async function atualizarStatus(id, novoStatus) {
+      const response = await fetch(`${API_URL}/tarefas/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: novoStatus })
+      });
+      if (response.ok) carregarTarefas();
     }
 
     async function deletarTarefa(id) {
