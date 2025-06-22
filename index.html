@@ -1,114 +1,35 @@
-<script>
-  const API_URL = 'https://gerenciador-tarefas-api-2a09.onrender.com';
+async function adicionarTarefa() {
+  const titulo = document.getElementById('titulo').value.trim();
+  const data = document.getElementById('data').value;
+  const hora = document.getElementById('hora').value;
+  let categoria = document.getElementById('categoria').value;
 
-  const categoriaSelect = document.getElementById('categoria');
-  const categoriaPersonalizadaInput = document.getElementById('categoria-personalizada');
+  if (categoria === 'Personalizada') {
+    categoria = document.getElementById('categoria-personalizada').value.trim();
+  }
 
-  categoriaSelect.addEventListener('change', () => {
-    if (categoriaSelect.value === 'Personalizada') {
-      categoriaPersonalizadaInput.style.display = 'inline-block';
-    } else {
-      categoriaPersonalizadaInput.style.display = 'none';
-      categoriaPersonalizadaInput.value = '';
-    }
+  if (!titulo || !data || !hora || !categoria) {
+    alert('Por favor, preencha todos os campos corretamente.');
+    return;
+  }
+
+  const response = await fetch(`${API_URL}/tarefas`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ titulo, data, hora, categoria, status: 'pendente' })
   });
 
-  async function adicionarTarefa() {
-    const titulo = document.getElementById('titulo').value.trim();
-    const data = document.getElementById('data').value;
-    const hora = document.getElementById('hora').value;
-    let categoria = categoriaSelect.value;
-
-    if (categoria === 'Personalizada') {
-      categoria = categoriaPersonalizadaInput.value.trim();
-    }
-
-    if (!titulo || !data || !hora || !categoria) {
-      alert('Por favor, preencha todos os campos corretamente.');
-      return;
-    }
-
-    const response = await fetch(`${API_URL}/tarefas`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ titulo, data, hora, categoria, status: 'pendente' }) // Adiciona status
-    });
-
-    const result = await response.json(); // Lê a resposta como JSON
-    if (response.ok) {
-      document.getElementById('titulo').value = '';
-      document.getElementById('data').value = '';
-      document.getElementById('hora').value = '';
-      categoriaSelect.value = '';
-      categoriaPersonalizadaInput.value = '';
-      categoriaPersonalizadaInput.style.display = 'none';
-      carregarTarefas();
-    } else {
-      alert(`Erro ao adicionar tarefa: ${result.error || 'Verifique os campos.'}`);
-    }
-  }
-
-  let intervaloContadores;
-
-  async function carregarTarefas() {
-    if (intervaloContadores) clearInterval(intervaloContadores);
-    const filtro = document.getElementById('filtro').value;
-    const url = filtro ? `${API_URL}/tarefas?status=${filtro}` : `${API_URL}/tarefas`;
-    const response = await fetch(url);
-    const tarefas = await response.json();
-    const lista = document.getElementById('tarefas-list');
-    lista.innerHTML = '';
-
-    tarefas.forEach(tarefa => {
-      const li = document.createElement('li');
-      li.className = 'tarefa-item';
-
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'tarefa-info';
-      infoDiv.innerHTML = `<strong>${tarefa.titulo}</strong> (${tarefa.categoria}) - ${tarefa.status}<br/>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
-
-      const contadorSpan = document.createElement('span');
-      contadorSpan.className = 'contador';
-      contadorSpan.id = `contador-${tarefa.id}`;
-
-      const btnExcluir = document.createElement('button');
-      btnExcluir.className = 'delete-btn';
-      btnExcluir.textContent = 'Excluir';
-      btnExcluir.onclick = () => deletarTarefa(tarefa.id);
-
-      li.appendChild(infoDiv);
-      li.appendChild(contadorSpan);
-      li.appendChild(btnExcluir);
-
-      lista.appendChild(li);
-    });
-
-    intervaloContadores = setInterval(() => {
-      const now = new Date().getTime();
-      tarefas.forEach(tarefa => {
-        const dataHoraTarefa = new Date(`${tarefa.data}T${tarefa.hora}:00`).getTime();
-        const diff = dataHoraTarefa - now;
-
-        const contadorSpan = document.getElementById(`contador-${tarefa.id}`);
-
-        if (diff <= 0) {
-          contadorSpan.textContent = 'Já chegou!';
-        } else {
-          const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
-          const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-          const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          const segundos = Math.floor((diff % (1000 * 60)) / 1000);
-
-          contadorSpan.textContent = `Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s`;
-        }
-      });
-    }, 1000);
-  }
-
-  async function deletarTarefa(id) {
-    await fetch(`${API_URL}/tarefas/${id}`, { method: 'DELETE' });
+  const result = await response.json();
+  console.log('Resposta da API:', result); // Adicione isso para depurar
+  if (response.ok) {
+    document.getElementById('titulo').value = '';
+    document.getElementById('data').value = '';
+    document.getElementById('hora').value = '';
+    document.getElementById('categoria').value = '';
+    document.getElementById('categoria-personalizada').value = '';
+    document.getElementById('categoria-personalizada').style.display = 'none';
     carregarTarefas();
+  } else {
+    alert(`Erro ao adicionar tarefa: ${result.error || 'Verifique os campos.'}`);
   }
-
-  carregarTarefas();
-</script>
+}
