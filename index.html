@@ -1,224 +1,114 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gerenciador de Tarefas</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #556270, #4ecdc4);
-      margin: 0;
-      padding: 20px;
-      color: #fff;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    }
-    h1 {
-      text-align: center;
-      color: #fff;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    input, select, button {
-      padding: 10px;
-      margin: 5px;
-      border: none;
-      border-radius: 5px;
-    }
-    button {
-      background-color: #4ecdc4;
-      color: white;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    button:hover {
-      background-color: #3baaa0;
-    }
-    #tarefas-list {
-      list-style: none;
-      padding: 0;
-    }
-    .tarefa-item {
-      background: rgba(255, 255, 255, 0.2);
-      padding: 15px;
-      margin: 8px 0;
-      border-radius: 5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .tarefa-info {
-      flex-grow: 1;
-    }
-    .contador {
-      font-weight: bold;
-      font-size: 0.9em;
-      color: #ffd700;
-      margin-left: 10px;
-    }
-    .delete-btn {
-      background-color: #e63946;
-      padding: 7px 12px;
-      border-radius: 5px;
-      border: none;
-      color: white;
-      cursor: pointer;
-      margin-left: 15px;
-      transition: background-color 0.3s ease;
-    }
-    .delete-btn:hover {
-      background-color: #b22b35;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Gerenciador de Tarefas</h1>
-    <div class="form-group">
-      <input type="text" id="titulo" placeholder="Título da tarefa" />
-      <input type="date" id="data" min="2025-01-01" max="2025-12-31" />
-      <input type="time" id="hora" />
-      <select id="categoria">
-        <option value="">Selecione uma categoria</option>
-        <option value="Compromisso">Compromisso</option>
-        <option value="Curso">Curso</option>
-        <option value="Geral">Geral</option>
-        <option value="Personalizada">Personalizada</option>
-      </select>
-      <input type="text" id="categoria-personalizada" placeholder="Escreva a categoria personalizada" style="display:none;" />
-      <button onclick="adicionarTarefa()">Adicionar</button>
-    </div>
-    <div class="form-group">
-      <select id="filtro" onchange="carregarTarefas()">
-        <option value="">Todos</option>
-        <option value="pendente">Pendentes</option>
-        <option value="concluído">Concluídos</option>
-      </select>
-    </div>
-    <ul id="tarefas-list"></ul>
-  </div>
+<script>
+  const API_URL = 'https://gerenciador-tarefas-api-2a09.onrender.com';
 
-  <script>
-    const API_URL = 'https://gerenciador-tarefas-api-2a09.onrender.com';
+  const categoriaSelect = document.getElementById('categoria');
+  const categoriaPersonalizadaInput = document.getElementById('categoria-personalizada');
 
-    const categoriaSelect = document.getElementById('categoria');
-    const categoriaPersonalizadaInput = document.getElementById('categoria-personalizada');
+  categoriaSelect.addEventListener('change', () => {
+    if (categoriaSelect.value === 'Personalizada') {
+      categoriaPersonalizadaInput.style.display = 'inline-block';
+    } else {
+      categoriaPersonalizadaInput.style.display = 'none';
+      categoriaPersonalizadaInput.value = '';
+    }
+  });
 
-    categoriaSelect.addEventListener('change', () => {
-      if (categoriaSelect.value === 'Personalizada') {
-        categoriaPersonalizadaInput.style.display = 'inline-block';
-      } else {
-        categoriaPersonalizadaInput.style.display = 'none';
-        categoriaPersonalizadaInput.value = '';
-      }
+  async function adicionarTarefa() {
+    const titulo = document.getElementById('titulo').value.trim();
+    const data = document.getElementById('data').value;
+    const hora = document.getElementById('hora').value;
+    let categoria = categoriaSelect.value;
+
+    if (categoria === 'Personalizada') {
+      categoria = categoriaPersonalizadaInput.value.trim();
+    }
+
+    if (!titulo || !data || !hora || !categoria) {
+      alert('Por favor, preencha todos os campos corretamente.');
+      return;
+    }
+
+    const response = await fetch(`${API_URL}/tarefas`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulo, data, hora, categoria, status: 'pendente' }) // Adiciona status
     });
 
-    async function adicionarTarefa() {
-      const titulo = document.getElementById('titulo').value.trim();
-      const data = document.getElementById('data').value;
-      const hora = document.getElementById('hora').value;
-      let categoria = categoriaSelect.value;
-
-      if (categoria === 'Personalizada') {
-        categoria = categoriaPersonalizadaInput.value.trim();
-      }
-
-      if (!titulo || !data || !hora || !categoria) {
-        alert('Por favor, preencha todos os campos corretamente.');
-        return;
-      }
-
-      const response = await fetch(`${API_URL}/tarefas`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ titulo, data, hora, categoria, status: 'pendente' })
-      });
-
-      if (response.ok) {
-        document.getElementById('titulo').value = '';
-        document.getElementById('data').value = '';
-        document.getElementById('hora').value = '';
-        categoriaSelect.value = '';
-        categoriaPersonalizadaInput.value = '';
-        categoriaPersonalizadaInput.style.display = 'none';
-        carregarTarefas();
-      } else {
-        alert('Erro ao adicionar tarefa');
-      }
-    }
-
-    let intervaloContadores;
-
-    async function carregarTarefas() {
-      if (intervaloContadores) clearInterval(intervaloContadores);
-      const filtro = document.getElementById('filtro').value;
-      const url = filtro ? `${API_URL}/tarefas?status=${filtro}` : `${API_URL}/tarefas`;
-      const response = await fetch(url);
-      const tarefas = await response.json();
-      const lista = document.getElementById('tarefas-list');
-      lista.innerHTML = '';
-
-      tarefas.forEach(tarefa => {
-        const li = document.createElement('li');
-        li.className = 'tarefa-item';
-
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'tarefa-info';
-        infoDiv.innerHTML = `<strong>${tarefa.titulo}</strong> (${tarefa.categoria}) - ${tarefa.status}<br/>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
-
-        const contadorSpan = document.createElement('span');
-        contadorSpan.className = 'contador';
-        contadorSpan.id = `contador-${tarefa.id}`;
-
-        const btnExcluir = document.createElement('button');
-        btnExcluir.className = 'delete-btn';
-        btnExcluir.textContent = 'Excluir';
-        btnExcluir.onclick = () => deletarTarefa(tarefa.id);
-
-        li.appendChild(infoDiv);
-        li.appendChild(contadorSpan);
-        li.appendChild(btnExcluir);
-
-        lista.appendChild(li);
-      });
-
-      intervaloContadores = setInterval(() => {
-        const now = new Date().getTime();
-        tarefas.forEach(tarefa => {
-          const dataHoraTarefa = new Date(`${tarefa.data}T${tarefa.hora}:00`).getTime();
-          const diff = dataHoraTarefa - now;
-
-          const contadorSpan = document.getElementById(`contador-${tarefa.id}`);
-
-          if (diff <= 0) {
-            contadorSpan.textContent = 'Já chegou!';
-          } else {
-            const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const segundos = Math.floor((diff % (1000 * 60)) / 1000);
-
-            contadorSpan.textContent = `Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s`;
-          }
-        });
-      }, 1000);
-    }
-
-    async function deletarTarefa(id) {
-      await fetch(`${API_URL}/tarefas/${id}`, { method: 'DELETE' });
+    const result = await response.json(); // Lê a resposta como JSON
+    if (response.ok) {
+      document.getElementById('titulo').value = '';
+      document.getElementById('data').value = '';
+      document.getElementById('hora').value = '';
+      categoriaSelect.value = '';
+      categoriaPersonalizadaInput.value = '';
+      categoriaPersonalizadaInput.style.display = 'none';
       carregarTarefas();
+    } else {
+      alert(`Erro ao adicionar tarefa: ${result.error || 'Verifique os campos.'}`);
     }
+  }
 
+  let intervaloContadores;
+
+  async function carregarTarefas() {
+    if (intervaloContadores) clearInterval(intervaloContadores);
+    const filtro = document.getElementById('filtro').value;
+    const url = filtro ? `${API_URL}/tarefas?status=${filtro}` : `${API_URL}/tarefas`;
+    const response = await fetch(url);
+    const tarefas = await response.json();
+    const lista = document.getElementById('tarefas-list');
+    lista.innerHTML = '';
+
+    tarefas.forEach(tarefa => {
+      const li = document.createElement('li');
+      li.className = 'tarefa-item';
+
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'tarefa-info';
+      infoDiv.innerHTML = `<strong>${tarefa.titulo}</strong> (${tarefa.categoria}) - ${tarefa.status}<br/>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
+
+      const contadorSpan = document.createElement('span');
+      contadorSpan.className = 'contador';
+      contadorSpan.id = `contador-${tarefa.id}`;
+
+      const btnExcluir = document.createElement('button');
+      btnExcluir.className = 'delete-btn';
+      btnExcluir.textContent = 'Excluir';
+      btnExcluir.onclick = () => deletarTarefa(tarefa.id);
+
+      li.appendChild(infoDiv);
+      li.appendChild(contadorSpan);
+      li.appendChild(btnExcluir);
+
+      lista.appendChild(li);
+    });
+
+    intervaloContadores = setInterval(() => {
+      const now = new Date().getTime();
+      tarefas.forEach(tarefa => {
+        const dataHoraTarefa = new Date(`${tarefa.data}T${tarefa.hora}:00`).getTime();
+        const diff = dataHoraTarefa - now;
+
+        const contadorSpan = document.getElementById(`contador-${tarefa.id}`);
+
+        if (diff <= 0) {
+          contadorSpan.textContent = 'Já chegou!';
+        } else {
+          const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const segundos = Math.floor((diff % (1000 * 60)) / 1000);
+
+          contadorSpan.textContent = `Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s`;
+        }
+      });
+    }, 1000);
+  }
+
+  async function deletarTarefa(id) {
+    await fetch(`${API_URL}/tarefas/${id}`, { method: 'DELETE' });
     carregarTarefas();
-  </script>
-</body>
-</html>
+  }
+
+  carregarTarefas();
+</script>
