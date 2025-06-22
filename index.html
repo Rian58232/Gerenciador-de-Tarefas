@@ -192,14 +192,13 @@
 
     async function checkRegistration() {
       try {
-        // Tenta recuperar o deviceKey salvo
         let deviceKey = localStorage.getItem('deviceKey');
         if (!deviceKey) {
           const ipResponse = await fetch('https://api.ipify.org?format=json');
           const ipData = await ipResponse.json();
           const ip = ipData.ip;
           const timestamp = new Date().getTime();
-          deviceKey = btoa(ip + ':' + timestamp); // Gera novo key se não existir
+          deviceKey = btoa(ip + ':' + timestamp);
           localStorage.setItem('deviceKey', deviceKey);
         }
         currentDeviceKey = deviceKey;
@@ -207,32 +206,23 @@
         const checkResponse = await fetch(`${API_URL}/check-device?key=${encodeURIComponent(currentDeviceKey)}`);
         const checkResult = await checkResponse.json();
 
-        if (checkResult.registered) {
-          loginModal.classList.remove('animate__fadeIn');
-          loginModal.classList.add('animate__fadeOut');
-          setTimeout(() => {
-            loginModal.style.display = 'none';
-            modalOverlay.style.display = 'none';
-            mainContainer.style.display = 'block';
-            carregarTarefas();
-          }, 500);
-        } else {
+        if (!checkResult.registered) {
           await fetch(`${API_URL}/register-device`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ key: currentDeviceKey })
           });
-          loginModal.classList.remove('animate__fadeIn');
-          loginModal.classList.add('animate__fadeOut');
-          setTimeout(() => {
-            loginModal.style.display = 'none';
-            modalOverlay.style.display = 'none';
-            mainContainer.style.display = 'block';
-            carregarTarefas();
-          }, 500);
         }
+        loginModal.classList.remove('animate__fadeIn');
+        loginModal.classList.add('animate__fadeOut');
+        setTimeout(() => {
+          loginModal.style.display = 'none';
+          modalOverlay.style.display = 'none';
+          mainContainer.style.display = 'block';
+          carregarTarefas();
+        }, 500);
       } catch (error) {
-        alert('Erro ao verificar dispositivo. Tente novamente!');
+        alert('Erro ao verificar dispositivo. Tente novamente ou limpe o registro!');
         console.error(error);
       }
     }
@@ -262,7 +252,7 @@
       }
       if (confirm('Tem certeza que deseja limpar o registro deste dispositivo?')) {
         await fetch(`${API_URL}/clear-device?key=${currentDeviceKey}`, { method: 'DELETE' });
-        localStorage.removeItem('deviceKey'); // Remove o key salvo
+        localStorage.removeItem('deviceKey');
         showLoginModal();
         mainContainer.style.display = 'none';
         currentDeviceKey = null;
@@ -308,7 +298,7 @@
         carregarTarefas();
         showNotification('Tarefa adicionada com sucesso!');
       } else {
-        alert(`Erro ao adicionar tarefa: ${result.error || 'Verifique os campos.'}`);
+        alert(`Erro ao adicionar tarefa: ${result.error || 'Verifique os campos ou tente limpar o registro.'}`);
       }
     }
 
