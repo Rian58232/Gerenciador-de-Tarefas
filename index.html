@@ -383,7 +383,7 @@
         categoria = 'Sem Categoria';
       }
       console.log('Renderizando tarefa - Após decodificação:', { titulo, categoria });
-      infoDiv.innerHTML = `<strong>${titulo}</strong><br>Categoria: ${categoria} - ${tarefa.status}<br>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
+      infoDiv.innerHTML = `<strong>Título: ${titulo}</strong><br>Categoria: ${categoria} - Status: ${tarefa.status}<br>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
 
       const contadorSpan = document.createElement('span');
       contadorSpan.className = 'contador normal';
