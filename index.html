@@ -345,7 +345,28 @@
       const lista = document.getElementById('tarefas-list');
       const infoDiv = document.createElement('div');
       infoDiv.className = 'tarefa-info';
-      infoDiv.innerHTML = `<strong>${atob(tarefa.titulo)}</strong> (${atob(tarefa.categoria)}) - ${tarefa.status}<br/>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
+      let titulo = tarefa.titulo;
+      let categoria = tarefa.categoria;
+      try {
+        // Validação antes de decodificar
+        if (typeof titulo === 'string' && titulo.length > 0 && /^[A-Za-z0-9+/=]+$/.test(titulo)) {
+          titulo = atob(titulo);
+        } else {
+          console.warn('Título inválido para decodificação:', tarefa.titulo);
+          titulo = 'Título Corrompido';
+        }
+        if (typeof categoria === 'string' && categoria.length > 0 && /^[A-Za-z0-9+/=]+$/.test(categoria)) {
+          categoria = atob(categoria);
+        } else {
+          console.warn('Categoria inválida para decodificação:', tarefa.categoria);
+          categoria = 'Categoria Corrompida';
+        }
+      } catch (e) {
+        console.error('Erro ao decodificar:', e);
+        titulo = 'Título Corrompido';
+        categoria = 'Categoria Corrompida';
+      }
+      infoDiv.innerHTML = `<strong>${titulo}</strong> (${categoria}) - ${tarefa.status}<br/>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
 
       const contadorSpan = document.createElement('span');
       contadorSpan.className = 'contador normal';
