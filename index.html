@@ -277,22 +277,25 @@
       const titulo = btoa(document.getElementById('titulo').value.trim());
       const data = document.getElementById('data').value;
       const hora = document.getElementById('hora').value;
-      let categoria = btoa(document.getElementById('categoria').value);
+      let categoria = document.getElementById('categoria').value;
       const now = new Date();
 
+      console.log('Dados enviados:', { titulo, data, hora, categoria });
+
       // Garantir que a categoria seja válida
-      if (!categoria || categoria === btoa('')) {
+      if (!categoria || categoria === '') {
         alert('Por favor, selecione uma categoria!');
         return;
       }
-      if (categoria === btoa('Personalizada')) {
+      if (categoria === 'Personalizada') {
         const customCategoria = document.getElementById('categoria-personalizada').value.trim();
         if (!customCategoria) {
           alert('Por favor, insira a categoria personalizada!');
           return;
         }
-        categoria = btoa(customCategoria);
+        categoria = customCategoria; // Usa o valor personalizado sem codificar aqui
       }
+      categoria = btoa(categoria); // Codifica a categoria final
 
       if (!titulo || !data || !hora) {
         alert('Por favor, preencha todos os campos corretamente.');
