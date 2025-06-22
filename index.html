@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gerenciador de Tarefas by: Rian</title>
+  <title>Gerenciador de Tarefas Seguro</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
@@ -192,25 +192,36 @@
 
     async function checkRegistration() {
       try {
-        const ipResponse = await fetch('https://api.ipify.org?format=json');
-        const ipData = await ipResponse.json();
-        const ip = ipData.ip;
-        const timestamp = new Date().getTime();
-        // Hash simples usando IP e timestamp
-        const deviceKey = btoa(ip + ':' + timestamp); // Base64 encoding como criptografia básica
+        // Tenta recuperar o deviceKey salvo
+        let deviceKey = localStorage.getItem('deviceKey');
+        if (!deviceKey) {
+          const ipResponse = await fetch('https://api.ipify.org?format=json');
+          const ipData = await ipResponse.json();
+          const ip = ipData.ip;
+          const timestamp = new Date().getTime();
+          deviceKey = btoa(ip + ':' + timestamp); // Gera novo key se não existir
+          localStorage.setItem('deviceKey', deviceKey);
+        }
+        currentDeviceKey = deviceKey;
 
-        const checkResponse = await fetch(`${API_URL}/check-device?key=${encodeURIComponent(deviceKey)}`);
+        const checkResponse = await fetch(`${API_URL}/check-device?key=${encodeURIComponent(currentDeviceKey)}`);
         const checkResult = await checkResponse.json();
 
         if (checkResult.registered) {
-          alert('Este dispositivo já está registrado! Use outro dispositivo ou limpe o registro.');
+          loginModal.classList.remove('animate__fadeIn');
+          loginModal.classList.add('animate__fadeOut');
+          setTimeout(() => {
+            loginModal.style.display = 'none';
+            modalOverlay.style.display = 'none';
+            mainContainer.style.display = 'block';
+            carregarTarefas();
+          }, 500);
         } else {
           await fetch(`${API_URL}/register-device`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ key: deviceKey })
+            body: JSON.stringify({ key: currentDeviceKey })
           });
-          currentDeviceKey = deviceKey;
           loginModal.classList.remove('animate__fadeIn');
           loginModal.classList.add('animate__fadeOut');
           setTimeout(() => {
@@ -251,6 +262,7 @@
       }
       if (confirm('Tem certeza que deseja limpar o registro deste dispositivo?')) {
         await fetch(`${API_URL}/clear-device?key=${currentDeviceKey}`, { method: 'DELETE' });
+        localStorage.removeItem('deviceKey'); // Remove o key salvo
         showLoginModal();
         mainContainer.style.display = 'none';
         currentDeviceKey = null;
@@ -263,10 +275,10 @@
         alert('Por favor, faça login primeiro!');
         return;
       }
-      const titulo = btoa(document.getElementById('titulo').value.trim()); // Criptografia básica
+      const titulo = btoa(document.getElementById('titulo').value.trim());
       const data = document.getElementById('data').value;
       const hora = document.getElementById('hora').value;
-      let categoria = btoa(document.getElementById('categoria').value); // Criptografia básica
+      let categoria = btoa(document.getElementById('categoria').value);
       const now = new Date();
 
       if (categoria === btoa('Personalizada')) {
