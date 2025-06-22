@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gerenciador de Tarefas</title>
+  <title>Gerenciador de Tarefas Profissional</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <style>
     * {
       box-sizing: border-box;
@@ -11,72 +14,99 @@
       padding: 0;
     }
     body {
-      font-family: 'Poppins', Arial, sans-serif;
-      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+      background-size: 400% 400%;
       color: #f0f2f5;
       min-height: 100vh;
       padding: 20px;
-      transition: background 0.5s ease;
+      animation: gradientShift 15s ease infinite;
+      overflow-x: hidden;
     }
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+    @keyframes gradientShift {
+      0% { background-position: 0% 0%; }
+      50% { background-position: 100% 100%; }
+      100% { background-position: 0% 0%; }
+    }
     .container {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      animation: fadeInUp 0.7s ease-out;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 35px;
+      border-radius: 25px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      animation: bounceIn 1s ease-out;
     }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes bounceIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
     }
     h1 {
       text-align: center;
+      font-size: 2.8em;
       color: #fff;
-      font-size: 2.5em;
-      margin-bottom: 25px;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      margin-bottom: 30px;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
     }
-    .form-group {
+    .header-actions {
       display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      margin-bottom: 25px;
+      justify-content: flex-end;
+      margin-bottom: 20px;
     }
-    input, select {
-      flex: 1;
-      padding: 12px 15px;
-      border: none;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.2);
-      color: #f0f2f5;
-      font-size: 1em;
-      transition: all 0.3s ease;
-    }
-    input:focus, select:focus {
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(1.02);
-      outline: none;
-    }
-    button {
-      padding: 12px 25px;
+    .theme-toggle {
+      padding: 8px 15px;
       border: none;
       border-radius: 10px;
       background: #4a90e2;
       color: #fff;
-      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .theme-toggle:hover {
+      background: #357ab7;
+      transform: translateY(-2px);
+    }
+    .form-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    input, select {
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #f0f2f5;
+      font-size: 1.1em;
+      transition: all 0.3s ease;
+    }
+    input:focus, select:focus {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.03);
+      outline: none;
+      box-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+    }
+    button {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 12px;
+      background: #4a90e2;
+      color: #fff;
+      font-size: 1.1em;
       cursor: pointer;
       transition: all 0.3s ease;
     }
     button:hover {
       background: #357ab7;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 7px 20px rgba(74, 144, 226, 0.5);
     }
     button i {
-      margin-right: 5px;
+      margin-right: 8px;
     }
     #tarefas-list {
       list-style: none;
@@ -84,43 +114,45 @@
     }
     .tarefa-item {
       background: rgba(255, 255, 255, 0.1);
-      padding: 15px 20px;
+      padding: 20px;
       margin: 15px 0;
       border-radius: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      animation: slideIn 0.5s ease-out;
+      animation: slideInRight 0.5s ease-out;
     }
-    @keyframes slideIn {
-      from { transform: translateX(-20px); opacity: 0; }
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }
     }
     .tarefa-info {
       flex-grow: 1;
-      font-size: 1.1em;
+      font-size: 1.2em;
     }
     .tarefa-info strong {
       color: #fff;
+      text-transform: capitalize;
     }
     .contador {
       font-weight: 600;
       margin-left: 15px;
-      transition: color 0.3s ease;
+      transition: all 0.3s ease;
     }
-    .contador.urgent { color: #e74c3c; }
-    .contador.warning { color: #f1c40f; }
-    .contador.normal { color: #2ecc71; }
+    .contador.urgent { color: #e74c3c; text-shadow: 0 0 5px #e74c3c; }
+    .contador.warning { color: #f1c40f; text-shadow: 0 0 5px #f1c40f; }
+    .contador.normal { color: #2ecc71; text-shadow: 0 0 5px #2ecc71; }
     .action-btns {
       display: flex;
-      gap: 10px;
+      gap: 12px;
     }
     .delete-btn, .complete-btn {
-      padding: 8px 20px;
-      border-radius: 10px;
+      padding: 10px 25px;
+      border-radius: 12px;
       border: none;
       cursor: pointer;
       transition: all 0.3s ease;
+      font-weight: 600;
     }
     .delete-btn {
       background: #e74c3c;
@@ -128,8 +160,8 @@
     }
     .delete-btn:hover {
       background: #c0392b;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 7px 20px rgba(231, 76, 60, 0.5);
     }
     .complete-btn {
       background: #2ecc71;
@@ -137,22 +169,42 @@
     }
     .complete-btn:hover {
       background: #27ae60;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 7px 20px rgba(46, 204, 113, 0.5);
     }
-    @media (max-width: 600px) {
-      .form-group {
-        flex-direction: column;
-      }
-      input, select, button {
-        width: 100%;
-      }
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #2ecc71;
+      color: #fff;
+      padding: 15px 25px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: notify 3s ease-out forwards;
+    }
+    @keyframes notify {
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-20px); }
+    }
+    @media (max-width: 768px) {
+      .container { padding: 20px; }
+      h1 { font-size: 2em; }
+      .form-group { grid-template-columns: 1fr; }
+      input, select, button { width: 100%; }
+      .action-btns { flex-direction: column; gap: 8px; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Gerenciador de Tarefas</h1>
+    <div class="header-actions">
+      <button class="theme-toggle" onclick="toggleTheme()">Tema <i class="fas fa-adjust"></i></button>
+    </div>
+    <h1>Gerenciador de Tarefas Profissional</h1>
     <div class="form-group">
       <input type="text" id="titulo" placeholder="Título da tarefa" required />
       <input type="date" id="data" min="2025-01-01" max="2025-12-31" required />
@@ -165,7 +217,7 @@
         <option value="Personalizada">Personalizada</option>
       </select>
       <input type="text" id="categoria-personalizada" placeholder="Escreva a categoria personalizada" style="display:none;" />
-      <button onclick="adicionarTarefa()"><i class="fas fa-plus"></i> Adicionar</button>
+      <button onclick="adicionarTarefa()"><i class="fas fa-plus"></i> Adicionar Tarefa</button>
     </div>
     <div class="form-group">
       <select id="filtro" onchange="carregarTarefas()">
@@ -175,14 +227,17 @@
       </select>
     </div>
     <ul id="tarefas-list"></ul>
+    <div id="notification" class="notification"></div>
   </div>
 
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <script>
     const API_URL = 'https://gerenciador-tarefas-api-2a09.onrender.com';
+    let isDarkMode = false;
 
+    // Gerenciamento de categorias
     const categoriaSelect = document.getElementById('categoria');
     const categoriaPersonalizadaInput = document.getElementById('categoria-personalizada');
+    const notification = document.getElementById('notification');
 
     categoriaSelect.addEventListener('change', () => {
       if (categoriaSelect.value === 'Personalizada') {
@@ -193,11 +248,27 @@
       }
     });
 
+    // Alternar tema
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      document.body.style.background = isDarkMode 
+        ? 'linear-gradient(135deg, #2c3e50, #34495e)' 
+        : 'linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d)';
+      document.querySelectorAll('button').forEach(btn => {
+        btn.style.background = isDarkMode ? '#34495e' : '#4a90e2';
+      });
+      document.querySelectorAll('.tarefa-item').forEach(item => {
+        item.style.background = isDarkMode ? 'rgba(52, 73, 94, 0.3)' : 'rgba(255, 255, 255, 0.1)';
+      });
+    }
+
+    // Adicionar tarefa
     async function adicionarTarefa() {
       const titulo = document.getElementById('titulo').value.trim();
       const data = document.getElementById('data').value;
       const hora = document.getElementById('hora').value;
       let categoria = document.getElementById('categoria').value;
+      const now = new Date();
 
       if (categoria === 'Personalizada') {
         categoria = document.getElementById('categoria-personalizada').value.trim();
@@ -205,6 +276,12 @@
 
       if (!titulo || !data || !hora || !categoria) {
         alert('Por favor, preencha todos os campos corretamente.');
+        return;
+      }
+
+      const tarefaDateTime = new Date(`${data}T${hora}:00`);
+      if (tarefaDateTime < now) {
+        alert('A data e hora não podem ser anteriores ao momento atual.');
         return;
       }
 
@@ -216,23 +293,16 @@
 
       const result = await response.json();
       if (response.ok) {
-        document.getElementById('titulo').value = '';
-        document.getElementById('data').value = '';
-        document.getElementById('hora').value = '';
-        document.getElementById('categoria').value = '';
-        document.getElementById('categoria-personalizada').value = '';
-        document.getElementById('categoria-personalizada').style.display = 'none';
+        clearInputs();
         carregarTarefas();
-        alert('Tarefa adicionada com sucesso!');
+        showNotification('Tarefa adicionada com sucesso!');
       } else {
         alert(`Erro ao adicionar tarefa: ${result.error || 'Verifique os campos.'}`);
       }
     }
 
-    let intervaloContadores;
-
+    // Carregar tarefas
     async function carregarTarefas() {
-      if (intervaloContadores) clearInterval(intervaloContadores);
       const filtro = document.getElementById('filtro').value;
       const url = filtro ? `${API_URL}/tarefas?status=${filtro}` : `${API_URL}/tarefas`;
       const response = await fetch(url);
@@ -240,80 +310,124 @@
       const lista = document.getElementById('tarefas-list');
       lista.innerHTML = '';
 
-      tarefas.forEach(tarefa => {
-        const li = document.createElement('li');
-        li.className = 'tarefa-item';
+      tarefas.forEach(tarefa => renderTarefa(tarefa));
+      updateCounters();
+    }
 
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'tarefa-info';
-        infoDiv.innerHTML = `<strong>${tarefa.titulo}</strong> (${tarefa.categoria}) - ${tarefa.status}<br/>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
+    // Renderizar tarefa
+    function renderTarefa(tarefa) {
+      const lista = document.getElementById('tarefas-list');
+      const li = document.createElement('li');
+      li.className = 'tarefa-item';
 
-        const contadorSpan = document.createElement('span');
-        contadorSpan.className = 'contador normal';
-        contadorSpan.id = `contador-${tarefa.id}`;
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'tarefa-info';
+      infoDiv.innerHTML = `<strong>${tarefa.titulo}</strong> (${tarefa.categoria}) - ${tarefa.status}<br/>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
 
-        const actionBtn = document.createElement('div');
-        actionBtn.className = 'action-btns';
+      const contadorSpan = document.createElement('span');
+      contadorSpan.className = 'contador normal';
+      contadorSpan.id = `contador-${tarefa.id}`;
 
-        const btnConcluir = document.createElement('button');
-        btnConcluir.className = 'complete-btn';
-        btnConcluir.textContent = tarefa.status === 'pendente' ? 'Concluir' : 'Reabrir';
-        btnConcluir.onclick = () => atualizarStatus(tarefa.id, tarefa.status === 'pendente' ? 'concluído' : 'pendente');
+      const actionBtn = document.createElement('div');
+      actionBtn.className = 'action-btns';
 
-        const btnExcluir = document.createElement('button');
-        btnExcluir.className = 'delete-btn';
-        btnExcluir.textContent = 'Excluir';
-        btnExcluir.onclick = () => deletarTarefa(tarefa.id);
+      const btnConcluir = document.createElement('button');
+      btnConcluir.className = 'complete-btn';
+      btnConcluir.textContent = tarefa.status === 'pendente' ? 'Concluir' : 'Reabrir';
+      btnConcluir.onclick = () => atualizarStatus(tarefa.id, tarefa.status === 'pendente' ? 'concluído' : 'pendente');
 
-        actionBtn.appendChild(btnConcluir);
-        actionBtn.appendChild(btnExcluir);
+      const btnExcluir = document.createElement('button');
+      btnExcluir.className = 'delete-btn';
+      btnExcluir.textContent = 'Excluir';
+      btnExcluir.onclick = () => deletarTarefa(tarefa.id);
 
-        li.appendChild(infoDiv);
-        li.appendChild(contadorSpan);
-        li.appendChild(actionBtn);
+      actionBtn.appendChild(btnConcluir);
+      actionBtn.appendChild(btnExcluir);
 
-        lista.appendChild(li);
+      li.appendChild(infoDiv);
+      li.appendChild(contadorSpan);
+      li.appendChild(actionBtn);
+
+      lista.appendChild(li);
+    }
+
+    // Atualizar contadores
+    function updateCounters() {
+      const now = new Date().getTime();
+      const tarefas = Array.from(document.querySelectorAll('.tarefa-item')).map(item => {
+        const id = item.querySelector('.contador').id.split('-')[1];
+        return { id, element: item.querySelector('.contador') };
       });
 
-      intervaloContadores = setInterval(() => {
-        const now = new Date().getTime();
-        tarefas.forEach(tarefa => {
-          const dataHoraTarefa = new Date(`${tarefa.data}T${tarefa.hora}:00`).getTime();
+      const interval = setInterval(() => {
+        tarefas.forEach(({ id, element }) => {
+          const tarefa = document.querySelector(`#contador-${id}`).closest('.tarefa-item');
+          const dataHoraTarefa = new Date(`${tarefa.dataset.data}T${tarefa.dataset.hora}:00`).getTime();
           const diff = dataHoraTarefa - now;
 
-          const contadorSpan = document.getElementById(`contador-${tarefa.id}`);
           if (diff <= 0) {
-            contadorSpan.textContent = 'Já chegou!';
-            contadorSpan.className = 'contador normal';
+            element.textContent = 'Já chegou!';
+            element.className = 'contador normal';
           } else {
             const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
             const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const segundos = Math.floor((diff % (1000 * 60)) / 1000);
 
-            contadorSpan.textContent = `Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s`;
-            if (diff < 24 * 60 * 60 * 1000) contadorSpan.className = 'contador urgent';
-            else if (diff < 48 * 60 * 60 * 1000) contadorSpan.className = 'contador warning';
-            else contadorSpan.className = 'contador normal';
+            element.textContent = `Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s`;
+            if (diff < 24 * 60 * 60 * 1000) element.className = 'contador urgent';
+            else if (diff < 48 * 60 * 60 * 1000) element.className = 'contador warning';
+            else element.className = 'contador normal';
           }
         });
       }, 1000);
+      return interval;
     }
 
+    // Atualizar status
     async function atualizarStatus(id, novoStatus) {
       const response = await fetch(`${API_URL}/tarefas/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: novoStatus })
       });
-      if (response.ok) carregarTarefas();
+      if (response.ok) {
+        carregarTarefas();
+        showNotification(`Tarefa ${novoStatus === 'concluído' ? 'concluída' : 'reaberta'} com sucesso!`);
+      }
     }
 
+    // Deletar tarefa
     async function deletarTarefa(id) {
       await fetch(`${API_URL}/tarefas/${id}`, { method: 'DELETE' });
       carregarTarefas();
+      showNotification('Tarefa excluída com sucesso!');
     }
 
+    // Limpar inputs
+    function clearInputs() {
+      document.getElementById('titulo').value = '';
+      document.getElementById('data').value = '';
+      document.getElementById('hora').value = '';
+      document.getElementById('categoria').value = '';
+      document.getElementById('categoria-personalizada').value = '';
+      document.getElementById('categoria-personalizada').style.display = 'none';
+    }
+
+    // Exibir notificação
+    function showNotification(message) {
+      notification.textContent = message;
+      notification.classList.add('animate__animated', 'animate__fadeIn');
+      setTimeout(() => {
+        notification.classList.remove('animate__fadeIn');
+        notification.classList.add('animate__fadeOut');
+      }, 2000);
+      setTimeout(() => {
+        notification.classList.remove('animate__fadeOut');
+      }, 3000);
+    }
+
+    // Inicialização
     carregarTarefas();
   </script>
 </body>
