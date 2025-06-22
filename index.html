@@ -200,18 +200,26 @@
           const timestamp = new Date().getTime();
           deviceKey = btoa(ip + ':' + timestamp);
           localStorage.setItem('deviceKey', deviceKey);
+          console.log('Novo deviceKey gerado:', deviceKey);
+        } else {
+          console.log('DeviceKey existente:', deviceKey);
         }
         currentDeviceKey = deviceKey;
 
         const checkResponse = await fetch(`${API_URL}/check-device?key=${encodeURIComponent(currentDeviceKey)}`);
         const checkResult = await checkResponse.json();
+        console.log('Check result:', checkResult);
 
         if (!checkResult.registered) {
-          await fetch(`${API_URL}/register-device`, {
+          console.log('Registrando novo deviceKey...');
+          const registerResponse = await fetch(`${API_URL}/register-device`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ key: currentDeviceKey })
           });
+          const registerResult = await registerResponse.json();
+          console.log('Registro result:', registerResult);
+          if (!registerResponse.ok) throw new Error('Falha no registro');
         }
         loginModal.classList.remove('animate__fadeIn');
         loginModal.classList.add('animate__fadeOut');
@@ -222,8 +230,9 @@
           carregarTarefas();
         }, 500);
       } catch (error) {
-        alert('Erro ao verificar dispositivo. Tente novamente ou limpe o registro!');
-        console.error(error);
+        console.error('Erro na verificação/registro:', error);
+        alert('Erro ao verificar ou registrar dispositivo. Tente novamente ou limpe o registro!');
+        showLoginModal();
       }
     }
 
@@ -298,6 +307,7 @@
         carregarTarefas();
         showNotification('Tarefa adicionada com sucesso!');
       } else {
+        console.error('Erro na API:', result);
         alert(`Erro ao adicionar tarefa: ${result.error || 'Verifique os campos ou tente limpar o registro.'}`);
       }
     }
@@ -308,6 +318,15 @@
       const filtro = document.getElementById('filtro').value;
       const url = `${API_URL}/tarefas?key=${encodeURIComponent(currentDeviceKey)}${filtro ? `&status=${filtro}` : ''}`;
       const response = await fetch(url);
+      console.log('Carregar tarefas response status:', response.status);
+      if (!response.ok) {
+        console.error('Erro ao carregar tarefas:', await response.text());
+        if (response.status === 403) {
+          alert('Sessão inválida. Tente limpar o registro e refazer o login.');
+          clearRegistration();
+          return;
+        }
+      }
       const tarefas = await response.json();
       const lista = document.getElementById('tarefas-list');
       lista.innerHTML = '';
