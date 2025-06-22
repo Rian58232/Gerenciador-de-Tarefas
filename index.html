@@ -280,11 +280,21 @@
       let categoria = btoa(document.getElementById('categoria').value);
       const now = new Date();
 
+      // Garantir que a categoria seja válida
+      if (!categoria || categoria === btoa('')) {
+        alert('Por favor, selecione uma categoria!');
+        return;
+      }
       if (categoria === btoa('Personalizada')) {
-        categoria = btoa(document.getElementById('categoria-personalizada').value.trim());
+        const customCategoria = document.getElementById('categoria-personalizada').value.trim();
+        if (!customCategoria) {
+          alert('Por favor, insira a categoria personalizada!');
+          return;
+        }
+        categoria = btoa(customCategoria);
       }
 
-      if (!titulo || !data || !hora || !categoria) {
+      if (!titulo || !data || !hora) {
         alert('Por favor, preencha todos os campos corretamente.');
         return;
       }
@@ -366,7 +376,7 @@
         titulo = 'Título Corrompido';
         categoria = 'Categoria Corrompida';
       }
-      infoDiv.innerHTML = `<strong>${titulo}</strong> (${categoria}) - ${tarefa.status}<br/>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
+      infoDiv.innerHTML = `<strong>${titulo}</strong> (${categoria || 'Sem Categoria'}) - ${tarefa.status}<br/>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
 
       const contadorSpan = document.createElement('span');
       contadorSpan.className = 'contador normal';
