@@ -20,23 +20,34 @@
       color: #f0f2f5;
       min-height: 100vh;
       padding: 20px;
-      animation: gradientShift 15s ease infinite;
       overflow-x: hidden;
+      animation: gradientShift 15s ease infinite;
     }
     @keyframes gradientShift {
       0% { background-position: 0% 0%; }
       50% { background-position: 100% 100%; }
       100% { background-position: 0% 0%; }
     }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
     .container {
       max-width: 1100px;
       margin: 0 auto;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      padding: 35px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      padding: 40px;
       border-radius: 25px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
       animation: bounceIn 1s ease-out;
     }
     @keyframes bounceIn {
@@ -44,22 +55,15 @@
       50% { transform: scale(1.05); }
       100% { transform: scale(1); opacity: 1; }
     }
-    h1 {
-      text-align: center;
-      font-size: 2.8em;
-      color: #fff;
-      margin-bottom: 30px;
-      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
-    }
     .header-actions {
       display: flex;
       justify-content: flex-end;
       margin-bottom: 20px;
     }
     .theme-toggle {
-      padding: 8px 15px;
+      padding: 10px 20px;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       background: #4a90e2;
       color: #fff;
       cursor: pointer;
@@ -67,7 +71,14 @@
     }
     .theme-toggle:hover {
       background: #357ab7;
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.8em;
+      color: #fff;
+      margin-bottom: 30px;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
     }
     .form-group {
       display: grid;
@@ -121,6 +132,10 @@
       justify-content: space-between;
       align-items: center;
       animation: slideInRight 0.5s ease-out;
+      transition: transform 0.3s ease;
+    }
+    .tarefa-item:hover {
+      transform: translateX(5px);
     }
     @keyframes slideInRight {
       from { transform: translateX(100%); opacity: 0; }
@@ -200,6 +215,7 @@
   </style>
 </head>
 <body>
+  <canvas id="particleCanvas"></canvas>
   <div class="container">
     <div class="header-actions">
       <button class="theme-toggle" onclick="toggleTheme()">Tema <i class="fas fa-adjust"></i></button>
@@ -233,12 +249,53 @@
   <script>
     const API_URL = 'https://gerenciador-tarefas-api-2a09.onrender.com';
     let isDarkMode = false;
+    let intervalContadores;
 
-    // Gerenciamento de categorias
+    // Elementos
     const categoriaSelect = document.getElementById('categoria');
     const categoriaPersonalizadaInput = document.getElementById('categoria-personalizada');
     const notification = document.getElementById('notification');
+    const particleCanvas = document.getElementById('particleCanvas');
+    const ctx = particleCanvas.getContext('2d');
 
+    // Partículas de fundo
+    function initParticles() {
+      particleCanvas.width = window.innerWidth;
+      particleCanvas.height = window.innerHeight;
+      const particles = [];
+      for (let i = 0; i < 100; i++) {
+        particles.push({
+          x: Math.random() * particleCanvas.width,
+          y: Math.random() * particleCanvas.height,
+          r: Math.random() * 2 + 1,
+          vx: Math.random() - 0.5,
+          vy: Math.random() - 0.5
+        });
+      }
+      function animate() {
+        ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+          ctx.fill();
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0 || p.x > particleCanvas.width) p.vx = -p.vx;
+          if (p.y < 0 || p.y > particleCanvas.height) p.vy = -p.vy;
+        }
+        requestAnimationFrame(animate);
+      }
+      animate();
+    }
+    window.addEventListener('resize', () => {
+      particleCanvas.width = window.innerWidth;
+      particleCanvas.height = window.innerHeight;
+    });
+    initParticles();
+
+    // Gerenciamento de categorias
     categoriaSelect.addEventListener('change', () => {
       if (categoriaSelect.value === 'Personalizada') {
         categoriaPersonalizadaInput.style.display = 'inline-block';
@@ -303,6 +360,7 @@
 
     // Carregar tarefas
     async function carregarTarefas() {
+      if (intervalContadores) clearInterval(intervalContadores);
       const filtro = document.getElementById('filtro').value;
       const url = filtro ? `${API_URL}/tarefas?status=${filtro}` : `${API_URL}/tarefas`;
       const response = await fetch(url);
@@ -310,16 +368,19 @@
       const lista = document.getElementById('tarefas-list');
       lista.innerHTML = '';
 
-      tarefas.forEach(tarefa => renderTarefa(tarefa));
-      updateCounters();
+      tarefas.forEach(tarefa => {
+        const li = document.createElement('li');
+        li.className = 'tarefa-item';
+        li.dataset.data = tarefa.data;
+        li.dataset.hora = tarefa.hora;
+        renderTarefa(li, tarefa);
+      });
+      intervalContadores = updateCounters();
     }
 
     // Renderizar tarefa
-    function renderTarefa(tarefa) {
+    function renderTarefa(li, tarefa) {
       const lista = document.getElementById('tarefas-list');
-      const li = document.createElement('li');
-      li.className = 'tarefa-item';
-
       const infoDiv = document.createElement('div');
       infoDiv.className = 'tarefa-info';
       infoDiv.innerHTML = `<strong>${tarefa.titulo}</strong> (${tarefa.categoria}) - ${tarefa.status}<br/>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
@@ -353,35 +414,31 @@
 
     // Atualizar contadores
     function updateCounters() {
-      const now = new Date().getTime();
-      const tarefas = Array.from(document.querySelectorAll('.tarefa-item')).map(item => {
-        const id = item.querySelector('.contador').id.split('-')[1];
-        return { id, element: item.querySelector('.contador') };
-      });
-
-      const interval = setInterval(() => {
-        tarefas.forEach(({ id, element }) => {
-          const tarefa = document.querySelector(`#contador-${id}`).closest('.tarefa-item');
-          const dataHoraTarefa = new Date(`${tarefa.dataset.data}T${tarefa.dataset.hora}:00`).getTime();
+      return setInterval(() => {
+        const now = new Date().getTime();
+        const tarefaItems = document.querySelectorAll('.tarefa-item');
+        tarefaItems.forEach(item => {
+          const id = item.querySelector('.contador').id.split('-')[1];
+          const contadorSpan = document.getElementById(`contador-${id}`);
+          const dataHoraTarefa = new Date(`${item.dataset.data}T${item.dataset.hora}:00`).getTime();
           const diff = dataHoraTarefa - now;
 
           if (diff <= 0) {
-            element.textContent = 'Já chegou!';
-            element.className = 'contador normal';
+            contadorSpan.textContent = 'Já chegou!';
+            contadorSpan.className = 'contador normal';
           } else {
             const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
             const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const segundos = Math.floor((diff % (1000 * 60)) / 1000);
 
-            element.textContent = `Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s`;
-            if (diff < 24 * 60 * 60 * 1000) element.className = 'contador urgent';
-            else if (diff < 48 * 60 * 60 * 1000) element.className = 'contador warning';
-            else element.className = 'contador normal';
+            contadorSpan.textContent = `Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s`;
+            if (diff < 24 * 60 * 60 * 1000) contadorSpan.className = 'contador urgent';
+            else if (diff < 48 * 60 * 60 * 1000) contadorSpan.className = 'contador warning';
+            else contadorSpan.className = 'contador normal';
           }
         });
       }, 1000);
-      return interval;
     }
 
     // Atualizar status
