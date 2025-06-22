@@ -274,7 +274,7 @@
         alert('Por favor, faça login primeiro!');
         return;
       }
-      const titulo = document.getElementById('titulo').value.trim(); // Sem codificação
+      const titulo = document.getElementById('titulo').value.trim(); // Texto puro
       const data = document.getElementById('data').value;
       const hora = document.getElementById('hora').value;
       let categoria = document.getElementById('categoria').value;
@@ -358,12 +358,10 @@
       const lista = document.getElementById('tarefas-list');
       const infoDiv = document.createElement('div');
       infoDiv.className = 'tarefa-info';
-      let titulo = tarefa.titulo;
-      let categoria = tarefa.categoria;
-      console.log('Renderizando tarefa - Antes da decodificação:', { titulo, categoria });
-      // Sem decodificação, usa os valores como estão
-      console.log('Renderizando tarefa - Após decodificação:', { titulo, categoria });
-      infoDiv.innerHTML = `<strong>Título: ${titulo}</strong><br>Categoria: ${categoria} - Status: ${tarefa.status}<br>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
+      let titulo = tarefa.titulo; // Usa direto, sem decodificação
+      let categoria = tarefa.categoria; // Usa direto, sem decodificação
+      console.log('Renderizando tarefa:', { titulo, categoria });
+      infoDiv.innerHTML = `<strong>Tarefa: ${titulo}</strong><br>Categoria: ${categoria || 'Nenhuma'} - Status: ${tarefa.status}<br>Data: ${tarefa.data} Hora: ${tarefa.hora}`;
 
       const contadorSpan = document.createElement('span');
       contadorSpan.className = 'contador normal';
@@ -409,57 +407,4 @@
             const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
             const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const segundos = Math.floor((diff % (1000 * 60)) / 1000);
-
-            contadorSpan.textContent = `Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s`;
-            if (diff < 24 * 60 * 60 * 1000) contadorSpan.className = 'contador urgent';
-            else if (diff < 48 * 60 * 60 * 1000) contadorSpan.className = 'contador warning';
-            else contadorSpan.className = 'contador normal';
-          }
-        });
-      }, 1000);
-    }
-
-    async function atualizarStatus(id, novoStatus) {
-      if (!currentDeviceKey) return;
-      const response = await fetch(`${API_URL}/tarefas/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: novoStatus })
-      });
-      if (response.ok) {
-        carregarTarefas();
-        showNotification(`Tarefa ${novoStatus === 'concluído' ? 'concluída' : 'reaberta'} com sucesso!`);
-      }
-    }
-
-    async function deletarTarefa(id) {
-      if (!currentDeviceKey) return;
-      await fetch(`${API_URL}/tarefas/${id}`, { method: 'DELETE' });
-      carregarTarefas();
-      showNotification('Tarefa excluída com sucesso!');
-    }
-
-    function clearInputs() {
-      document.getElementById('titulo').value = '';
-      document.getElementById('data').value = '';
-      document.getElementById('hora').value = '';
-      document.getElementById('categoria').value = '';
-      document.getElementById('categoria-personalizada').value = '';
-      document.getElementById('categoria-personalizada').style.display = 'none';
-    }
-
-    function showNotification(message) {
-      notification.textContent = message;
-      notification.classList.add('animate__animated', 'animate__fadeIn');
-      setTimeout(() => {
-        notification.classList.remove('animate__fadeIn');
-        notification.classList.add('animate__fadeOut');
-      }, 2000);
-      setTimeout(() => {
-        notification.classList.remove('animate__fadeOut');
-      }, 3000);
-    }
-  </script>
-</body>
-</html>
+            const segundos = Math.floor((diff % (100
