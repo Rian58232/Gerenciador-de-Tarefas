@@ -135,7 +135,7 @@
         return;
       }
 
-      const response = await fetch('http://localhost:3000/tarefas', {
+      const response = await fetch('http://localhost:10000/tarefas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ titulo, data, hora, categoria, status: 'pendente' })
@@ -159,7 +159,7 @@
     async function carregarTarefas() {
       if (intervaloContadores) clearInterval(intervaloContadores);
       const filtro = document.getElementById('filtro').value;
-      const url = filtro ? `http://localhost:3000/tarefas?status=${filtro}` : 'http://localhost:3000/tarefas';
+      const url = filtro ? `http://localhost:10000/tarefas?status=${filtro}` : 'http://localhost:10000/tarefas';
       const response = await fetch(url);
       const tarefas = await response.json();
       const lista = document.getElementById('tarefas-list');
@@ -216,7 +216,7 @@
     }
 
     async function deletarTarefa(id) {
-      await fetch(`http://localhost:3000/tarefas/${id}`, { method: 'DELETE' });
+      await fetch(`http://localhost:10000/tarefas/${id}`, { method: 'DELETE' });
       carregarTarefas();
     }
 
